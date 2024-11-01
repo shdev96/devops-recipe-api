@@ -7,7 +7,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket               = "devops-recipe-app-tf-state-2"
+    bucket               = "devops-recipe-app-api-state-2"
     key                  = "tf-state-deploy"
     workspace_key_prefix = "tf-state-deploy-env"
     region               = "ap-northeast-2"
@@ -15,9 +15,9 @@ terraform {
     dynamodb_table       = "devops-recipe-app-api-tf-lock"
   }
 }
+
 provider "aws" {
   region = "ap-northeast-2"
-
   default_tags {
     tags = {
       Environment = terraform.workspace

@@ -1,6 +1,6 @@
-##############################################
-# Create IAM user and polices for CD account #
-##############################################
+#######################################################################
+# Create IAM user and policies for Continuous Deployment (CD) account #
+#######################################################################
 
 resource "aws_iam_user" "cd" {
   name = "recipe-app-api-cd"
@@ -10,9 +10,10 @@ resource "aws_iam_access_key" "cd" {
   user = aws_iam_user.cd.name
 }
 
-###########################################################
-# Policy for Terraform backend to s3 and Dynamo DB Access #
-###########################################################
+#########################################################
+# Policy for Teraform backend to S3 and DynamoDB access #
+#########################################################
+
 data "aws_iam_policy_document" "tf_backend" {
   statement {
     effect    = "Allow"
@@ -28,7 +29,6 @@ data "aws_iam_policy_document" "tf_backend" {
       "arn:aws:s3:::${var.tf_state_bucket}/tf-state-deploy-env/*"
     ]
   }
-
   statement {
     effect = "Allow"
     actions = [
@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "tf_backend" {
 
 resource "aws_iam_policy" "tf_backend" {
   name        = "${aws_iam_user.cd.name}-tf-s3-dynamodb"
-  description = "Allow user to use s3 and dynamodb for TF backend resoure"
+  description = "Allow user to use S3 and DynamoDB for TF backend resources"
   policy      = data.aws_iam_policy_document.tf_backend.json
 }
 
@@ -134,7 +134,6 @@ data "aws_iam_policy_document" "ec2" {
       "ec2:AttachInternetGateway",
       "ec2:ModifyVpcAttribute",
       "ec2:RevokeSecurityGroupIngress",
-      "ec2:DescribeAvailabilityZones"
     ]
     resources = ["*"]
   }
@@ -166,9 +165,7 @@ data "aws_iam_policy_document" "rds" {
       "rds:CreateDBInstance",
       "rds:DeleteDBInstance",
       "rds:ListTagsForResource",
-      "rds:ModifyDBInstance",
-      "rds:ModifyDBSubnetGroup",
-      "rds:AddTagsToResource"
+      "rds:ModifyDBInstance"
     ]
     resources = ["*"]
   }
@@ -224,6 +221,7 @@ resource "aws_iam_user_policy_attachment" "ecs" {
 #########################
 # Policy for IAM access #
 #########################
+
 data "aws_iam_policy_document" "iam" {
   statement {
     effect = "Allow"
@@ -287,4 +285,119 @@ resource "aws_iam_policy" "logs" {
 resource "aws_iam_user_policy_attachment" "logs" {
   user       = aws_iam_user.cd.name
   policy_arn = aws_iam_policy.logs.arn
+}
+
+#########################
+# Policy for ELB access #
+#########################
+
+data "aws_iam_policy_document" "elb" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "elasticloadbalancing:DeleteLoadBalancer",
+      "elasticloadbalancing:DeleteTargetGroup",
+      "elasticloadbalancing:DeleteListener",
+      "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeLoadBalancerAttributes",
+      "elasticloadbalancing:DescribeTargetGroups",
+      "elasticloadbalancing:DescribeTargetGroupAttributes",
+      "elasticloadbalancing:DescribeLoadBalancers",
+      "elasticloadbalancing:CreateListener",
+      "elasticloadbalancing:SetSecurityGroups",
+      "elasticloadbalancing:ModifyLoadBalancerAttributes",
+      "elasticloadbalancing:CreateLoadBalancer",
+      "elasticloadbalancing:ModifyTargetGroupAttributes",
+      "elasticloadbalancing:CreateTargetGroup",
+      "elasticloadbalancing:AddTags",
+      "elasticloadbalancing:DescribeTags",
+      "elasticloadbalancing:ModifyListener"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "elb" {
+  name        = "${aws_iam_user.cd.name}-elb"
+  description = "Allow user to manage ELB resources."
+  policy      = data.aws_iam_policy_document.elb.json
+}
+
+resource "aws_iam_user_policy_attachment" "elb" {
+  user       = aws_iam_user.cd.name
+  policy_arn = aws_iam_policy.elb.arn
+}
+
+#########################
+# Policy for EFS access #
+#########################
+
+data "aws_iam_policy_document" "efs" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "elasticfilesystem:DescribeFileSystems",
+      "elasticfilesystem:DescribeAccessPoints",
+      "elasticfilesystem:DeleteFileSystem",
+      "elasticfilesystem:DeleteAccessPoint",
+      "elasticfilesystem:DescribeMountTargets",
+      "elasticfilesystem:DeleteMountTarget",
+      "elasticfilesystem:DescribeMountTargetSecurityGroups",
+      "elasticfilesystem:DescribeLifecycleConfiguration",
+      "elasticfilesystem:CreateMountTarget",
+      "elasticfilesystem:CreateAccessPoint",
+      "elasticfilesystem:CreateFileSystem",
+      "elasticfilesystem:TagResource",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "efs" {
+  name        = "${aws_iam_user.cd.name}-efs"
+  description = "Allow user to manage EFS resources."
+  policy      = data.aws_iam_policy_document.efs.json
+}
+
+resource "aws_iam_user_policy_attachment" "efs" {
+  user       = aws_iam_user.cd.name
+  policy_arn = aws_iam_policy.efs.arn
+}
+
+#############################
+# Policy for Route53 access #
+#############################
+
+data "aws_iam_policy_document" "route53" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "route53:ListHostedZones",
+      "route53:ListHostedZones",
+      "route53:ChangeTagsForResource",
+      "route53:GetHostedZone",
+      "route53:ListTagsForResource",
+      "route53:ChangeResourceRecordSets",
+      "route53:GetChange",
+      "route53:ListResourceRecordSets",
+      "acm:RequestCertificate",
+      "acm:AddTagsToCertificate",
+      "acm:DescribeCertificate",
+      "acm:ListTagsForCertificate",
+      "acm:DeleteCertificate",
+      "acm:CreateCertificate"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "route53" {
+  name        = "${aws_iam_user.cd.name}-route53"
+  description = "Allow user to manage Route53 resources."
+  policy      = data.aws_iam_policy_document.route53.json
+}
+
+resource "aws_iam_user_policy_attachment" "route53" {
+  user       = aws_iam_user.cd.name
+  policy_arn = aws_iam_policy.route53.arn
 }

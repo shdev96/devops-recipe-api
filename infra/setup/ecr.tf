@@ -1,5 +1,5 @@
-############################################
-# create ecr repos for storing docker images #
+##############################################
+# Create ECR repos for storing Docker images #
 ##############################################
 
 resource "aws_ecr_repository" "app" {
@@ -8,7 +8,7 @@ resource "aws_ecr_repository" "app" {
   force_delete         = true
 
   image_scanning_configuration {
-    # NOTE : update to true for real deployment
+    # NOTE: Update to true for real deployments.
     scan_on_push = false
   }
 }
@@ -19,7 +19,7 @@ resource "aws_ecr_repository" "proxy" {
   force_delete         = true
 
   image_scanning_configuration {
-    # NOTE : update to true for real deployment
+    # NOTE: Update to true for real deployments.
     scan_on_push = false
   }
 }

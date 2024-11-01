@@ -6,9 +6,8 @@ terraform {
     }
   }
 
-
   backend "s3" {
-    bucket         = "devops-recipe-app-tf-state-2"
+    bucket         = "devops-recipe-app-api-state-2"
     key            = "tf-state-setup"
     region         = "ap-northeast-2"
     encrypt        = true
