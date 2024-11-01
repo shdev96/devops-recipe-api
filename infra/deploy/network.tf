@@ -82,6 +82,9 @@ resource "aws_route" "public_internet_access_b" {
   gateway_id             = aws_internet_gateway.main.id
 }
 
+############################################
+# Private Subnets for internal access only #
+############################################
 resource "aws_subnet" "private_a" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.1.10.0/24"
@@ -101,9 +104,6 @@ resource "aws_subnet" "private_b" {
     Name = "${local.prefix}-private-b"
   }
 }
-
-
-
 
 #########################################################################
 ## Endpoints to allow ECS to access ECR, CloudWatch and Systems Manager #
