@@ -1,0 +1,8 @@
+│ Error: creating ECS Service (raa-staging-api): InvalidParameterException: Unable to assume the service linked role. Please verify that the ECS service linked role exists.
+│ 
+│   with aws_ecs_service.api,
+│   on ecs.tf line 186, in resource "aws_ecs_service" "api":
+│  186: resource "aws_ecs_service" "api" {
+│ 
+╵
+Error: Process completed with exit code 1.
