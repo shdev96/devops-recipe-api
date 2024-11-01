@@ -84,7 +84,7 @@ resource "aws_ecs_task_definition" "api" {
           },
           {
             name  = "ALLOWED_HOSTS"
-            value = aws_route53_record.app.fqdn
+            value = "*"
           }
         ]
         mountPoints = [
@@ -92,11 +92,6 @@ resource "aws_ecs_task_definition" "api" {
             readOnly      = false
             containerPath = "/vol/web/static"
             sourceVolume  = "static"
-          },
-          {
-            readOnly      = false
-            containerPath = "/vol/web/media"
-            sourceVolume  = "efs-media"
           }
         ],
         logConfiguration = {
@@ -131,11 +126,6 @@ resource "aws_ecs_task_definition" "api" {
             readOnly      = true
             containerPath = "/vol/static"
             sourceVolume  = "static"
-          },
-          {
-            readOnly      = true
-            containerPath = "/vol/media"
-            sourceVolume  = "efs-media"
           }
         ]
         logConfiguration = {
@@ -152,19 +142,6 @@ resource "aws_ecs_task_definition" "api" {
 
   volume {
     name = "static"
-  }
-
-  volume {
-    name = "efs-media"
-    efs_volume_configuration {
-      file_system_id     = aws_efs_file_system.media.id
-      transit_encryption = "ENABLED"
-
-      authorization_config {
-        access_point_id = aws_efs_access_point.media.id
-        iam             = "DISABLED"
-      }
-    }
   }
 
   runtime_platform {
@@ -197,25 +174,12 @@ resource "aws_security_group" "ecs_service" {
     ]
   }
 
-  # NFS Port for EFS volumes
-  egress {
-    from_port = 2049
-    to_port   = 2049
-    protocol  = "tcp"
-    cidr_blocks = [
-      aws_subnet.private_a.cidr_block,
-      aws_subnet.private_b.cidr_block,
-    ]
-  }
-
   # HTTP inbound access
   ingress {
-    from_port = 8000
-    to_port   = 8000
-    protocol  = "tcp"
-    security_groups = [
-      aws_security_group.lb.id
-    ]
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -229,17 +193,13 @@ resource "aws_ecs_service" "api" {
   enable_execute_command = true
 
   network_configuration {
+    assign_public_ip = true
+
     subnets = [
-      aws_subnet.private_a.id,
-      aws_subnet.private_b.id
+      aws_subnet.public_a.id,
+      aws_subnet.public_b.id
     ]
 
     security_groups = [aws_security_group.ecs_service.id]
-  }
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.api.arn
-    container_name   = "proxy"
-    container_port   = 8000
   }
 }
