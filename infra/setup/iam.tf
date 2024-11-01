@@ -134,6 +134,7 @@ data "aws_iam_policy_document" "ec2" {
       "ec2:AttachInternetGateway",
       "ec2:ModifyVpcAttribute",
       "ec2:RevokeSecurityGroupIngress",
+      "ec2:DescribeAvailabilityZones"
     ]
     resources = ["*"]
   }
@@ -223,7 +224,6 @@ resource "aws_iam_user_policy_attachment" "ecs" {
 #########################
 # Policy for IAM access #
 #########################
-
 data "aws_iam_policy_document" "iam" {
   statement {
     effect = "Allow"

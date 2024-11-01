@@ -1,7 +1,6 @@
 ###########################################
 # ECS Cluster for running app on Fargate. #
 ###########################################
-
 resource "aws_iam_policy" "task_execution_role_policy" {
   name        = "${local.prefix}-task-exec-role-policy"
   path        = "/"
